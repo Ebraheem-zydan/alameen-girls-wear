@@ -1,6 +1,7 @@
 node_modules
 .next
 out
-.env*.local
 *.tsbuildinfo
+.env*.local
 .DS_Store
+*.zip

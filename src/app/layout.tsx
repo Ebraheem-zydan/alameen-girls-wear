@@ -16,6 +16,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: {
     default: `${site.fullName.ar} — ${site.tagline.ar}`,
     template: `%s | ${site.brand.ar}`,

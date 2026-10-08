@@ -38,7 +38,7 @@ src/
 ```
 
 ## Design decisions
-- **Static export (`output: "export"`)**: the client is on shared hosting (Hostinger) with no Node runtime. Pre-rendering every route to plain HTML means no server costs and fast loads.
+- **Two deployment targets**: `npm run build && npm start` runs it as a Node app (Hostinger Web Apps), and `npm run build:static` pre-renders every route to plain HTML in `out/` for shared hosting without Node. The same code serves both, with no server-only features in the way.
 - **WhatsApp instead of a payment gateway**: the factory's wholesale buyers negotiate quantities and payment with a sales rep. A structured WhatsApp message fits the existing sales process instead of fighting it.
 - **No database (yet)**: around 30 models change rarely. The planned next step is a small Node.js/Express API with an admin panel, so the owner can edit products without a rebuild.
 
@@ -46,5 +46,6 @@ src/
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build      # static site in out/
+npm run build && npm start   # Node deployment
+npm run build:static         # static site in out/ (shared hosting)
 ```

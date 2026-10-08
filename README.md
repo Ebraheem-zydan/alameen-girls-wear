@@ -1,185 +1,50 @@
-# مصنع الأمين لملابس الأطفال — موقع الجملة
+# Alameen: Wholesale Kidswear Catalog
 
-موقع كتالوج جملة لمصنع الأمين (Alameen Girls Wear)، عربي/إنجليزي مع تبديل لغة كامل
-(RTL/LTR)، والطلب بيتحول لرسالة واتساب جاهزة بدل بوابة دفع.
+A bilingual (Arabic/English) wholesale catalog website built for **Alameen Girls Wear**, a kidswear manufacturer with 30+ years in business.
+Retail buyers browse models, build an order list, and send it to the factory as a ready-formatted WhatsApp message. B2B wholesale runs on WhatsApp, so the site uses that instead of a cart and payment gateway.
 
-## التشغيل
+> 🧑‍💼 Freelance client project. Built end-to-end by [Ibrahim Ragab](https://github.com/Ebraheem-zydan).
+> 🇪🇬 Client handoff and deployment notes (Arabic): [`README.ar.md`](README.ar.md)
 
+![Next.js](https://img.shields.io/badge/Next.js_14-000000?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+
+| Home | Product page |
+|---|---|
+| ![Home](docs/screenshots/home.png) | ![Product](docs/screenshots/product.png) |
+| **Catalog** | **Mobile** |
+| ![Catalog](docs/screenshots/catalog.png) | <img src="docs/screenshots/mobile.png" width="260" alt="Mobile"> |
+
+## Features
+- **Full RTL/LTR language switching**: Arabic and English from one dictionary (`src/lib/i18n.ts`), with direction-aware layout.
+- **Catalog**: search plus category filters that live in the URL (`/catalog?cat=knitwear`), so filtered views can be shared.
+- **Product pages**: color and size selection, plus a pack calculator (packs × pieces per pack).
+- **Order list**: persisted to `localStorage` through a React context (`src/lib/store.tsx`), so it survives reloads.
+- **WhatsApp checkout**: `buildOrderMessage()` serializes the order (model, size, color, quantity) into a pre-filled WhatsApp message.
+- **Feature flags for the business owner**: prices and minimum order quantity stay hidden until `showPrices` / `showMoq` are enabled in `src/lib/site.ts`.
+- **Single source of truth**: all business data (phones, address, hours, stats) lives in one config file.
+
+## Architecture
+```
+src/
+├─ app/            # App Router pages: /, /catalog, /product/[slug], /wholesale, /about, /contact
+├─ components/     # header, footer, product-card, order-drawer, garment (SVG fallback art)
+└─ lib/
+   ├─ data.ts      # categories and product models
+   ├─ site.ts      # business config + feature flags
+   ├─ i18n.ts      # AR/EN dictionary
+   └─ store.tsx    # language + order-list context, WhatsApp message builder
+```
+
+## Design decisions
+- **Static export (`output: "export"`)**: the client is on shared hosting (Hostinger) with no Node runtime. Pre-rendering every route to plain HTML means no server costs and fast loads.
+- **WhatsApp instead of a payment gateway**: the factory's wholesale buyers negotiate quantities and payment with a sales rep. A structured WhatsApp message fits the existing sales process instead of fighting it.
+- **No database (yet)**: around 30 models change rarely. The planned next step is a small Node.js/Express API with an admin panel, so the owner can edit products without a rebuild.
+
+## Run locally
 ```bash
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
+npm run build      # static site in out/
 ```
-
-الموقع بيفتح على http://localhost:3000 — مفيش أي إعدادات مطلوبة، كل الداتا محلية.
-
-> **مهم:** متشغّلش `npm run build` والسيرفر شغّال — الاتنين بيكتبوا في نفس مجلد
-> `.next` وبيبوّظوه. اقفل السيرفر الأول. لو حصل، امسح المجلد: `rm -rf .next`.
-
----
-
-## الرفع على Hostinger
-
-الموقع مظبوط على **تصدير ستاتيك** (`output: "export"` في
-[`next.config.mjs`](next.config.mjs))، يعني بيطلع HTML و CSS و JS بس من غير ما يحتاج
-Node شغال على السيرفر — فبيشتغل على أي خطة استضافة مشتركة.
-
-```bash
-npm run build
-```
-
-بيطلع مجلد `out/` فيه كل حاجة (حوالي ٥ ميجا). ارفع **محتوى** المجلد ده
-جوّه `public_html` على الاستضافة — مش المجلد نفسه.
-
-كل صفحة بتطلع `<route>/index.html`، وده اللي Apache و LiteSpeed بيخدموه
-لوحدهم، فمفيش حاجة اسمها `.htaccess` مطلوبة.
-
-**ملاحظات:**
-
-- الموقع لازم يكون في جذر الدومين. لو عايزه في مجلد فرعي
-  (`site.com/shop`) ضيف `basePath: "/shop"` في `next.config.mjs` وابني تاني.
-- غيّر `url` في [`src/lib/site.ts`](src/lib/site.ts) للدومين الفعلي قبل البناء،
-  عشان لينكات المشاركة على فيسبوك وواتساب تطلع صح.
-- أي تعديل في الموقع بعد كده = `npm run build` تاني ثم رفع `out/` تاني.
-
----
-
-## ⚠️ اقرا ده قبل ما تنشر الموقع
-
-الموقع دلوقتي فيه **نوعين من المحتوى**: بيانات حقيقية مسحوبة من صفحات الأمين
-الرسمية، وبيانات مؤقتة لازم تتبدل.
-
-### البيانات الحقيقية (متأكدين منها)
-
-مسحوبة من [صفحة فيسبوك](https://www.facebook.com/alameenegy) و
-[انستجرام](https://www.instagram.com/alameen_girls_wear) الرسميين:
-
-| البيان | القيمة |
-|---|---|
-| الاسم | مصنع الأمين لملابس الأطفال — Alameen Girls Wear |
-| الخبرة | أكتر من ٣٠ سنة (من الثمانينات) |
-| التليفونات | 01060066958 — 01006909021 |
-| فيسبوك | facebook.com/alameenegy (١٢ ألف متابع) |
-| انستجرام | @alameen_girls_wear |
-| تيك توك | @alameengroup4 |
-| تيليجرام | جروب التجار |
-| الفرع | فرع العبور |
-| المعرض | معرض نيللي كيدز — مركز مصر للمعارض الدولية |
-| اللوجو | مقصوص من صورة البروفايل الرسمية |
-| الصور | من بوستات صفحة الفيسبوك |
-
-### البيانات اللي **لازم** تتبدل قبل النشر
-
-كلها في [`src/lib/site.ts`](src/lib/site.ts) ومعلّمة بـ ⚠️:
-
-1. **العنوان الكامل للفرع** — دلوقتي مكتوب «فرع العبور — القاهرة» بس. حط العنوان
-   بالتفصيل ولينك جوجل مابس الصح في `address` و `mapUrl`.
-2. **مواعيد العمل** — دلوقتي «السبت – الخميس، ١٠ ص – ٦ م» وده تخمين. أكّده في `hours`.
-3. **الإيميل** — فاضي. لو فيه إيميل رسمي حطه في `email` وهيظهر لوحده، ولو سيبته فاضي
-   هيختفي من الموقع خالص.
-4. **الحد الأدنى للطلب** — `showMoq: false` دلوقتي، فالموقع بيقول «الكميات بتتأكد مع
-   المندوب». لما تعرف الرقم الصح حطه في `moq` وخلّي `showMoq: true`.
-5. **الأسعار** — `showPrices: false` دلوقتي، فكل الموديلات بتقول **«السعر عند الطلب»**.
-   الأرقام اللي في `data.ts` كلها أصفار/تجريبية. لما تدخل أسعارك الحقيقية خلّي
-   `showPrices: true` وهتظهر في الكتالوج وفي رسالة الواتساب.
-6. **أرقام المصنع** — `stats` فيه رقمين حقيقيين بس (٣٠+ سنة، ١٢ ألف متابع). لو عايز
-   تضيف طاقة الإنتاج الشهرية أو عدد العملاء أو عدد خطوط الإنتاج، ضيفهم في نفس
-   المصفوفة والشريط بيتوسّع لوحده.
-7. **الموديلات** — الـ ٢٦ موديل اللي في [`src/lib/data.ts`](src/lib/data.ts) **أوصاف
-   عامة**، مش أرقام موديلات حقيقية من إنتاج الأمين. لازم تتبدل بموديلاتك الفعلية.
-
-### حاجات اتشالت عن قصد
-
-الموقع كان فيه محتوى مخترع من أول نسخة قبل ما نعرف إن ده براند حقيقي. اتشال كله:
-
-- **آراء عملاء وهمية** (٣ شهادات بأسماء مخترعة) — دي حاجة ممكن تعمل مشكلة قانونية،
-  فاتشالت واتحط مكانها صور حقيقية من جناح المعرض.
-- **أرقام إنتاج مخترعة** (٤٠ ألف قطعة شهرياً، ٦٠٠ تاجر، ٣ خطوط إنتاج).
-- **شروط دفع وشحن مخترعة** (عربون ٥٠٪، خصم ١٠٪ فوق ٨٠٠ قطعة، استبدال ١٤ يوم،
-  شحن مجاني فوق ٥٠٠ قطعة) — اتبدلت بصيغة «بيتفق عليها مع المندوب».
-
-**متحطّش أي رقم من دول تاني غير لو هو صح فعلاً.**
-
----
-
-## الصور
-
-### الموجود دلوقتي
-
-في `public/brand/`:
-
-| الملف | إيه ده |
-|---|---|
-| `logo.png` | اللوجو مقصوص من صورة البروفايل — بيظهر في الهيدر والفوتر |
-| `logo-square.png` | نسخة مربعة — بتستخدم كأيقونة التاب (favicon) |
-| `profile.jpg` | صورة البروفايل الأصلية ٩٦٠×٩٦٠ |
-| `p02.jpg` | صورة الواجهة البراندد — في الهيرو وصفحة «عن المصنع» |
-| `p03.jpg` | كراتين الشحن بلوجو الأمين |
-| `p04.jpg` `p05.jpg` `p06.jpg` | صور حقيقية من جناح المعرض وزحمة التجار |
-| `p08.jpg` | بوستر معرض نيللي كيدز |
-| `p01.jpg` `p07.jpg` `p09.jpg` | بوستات تانية — مش مستخدمة حالياً |
-
-اللوجو خلفيته بيج ثابت (`#E6D9C9`) فبيتحط على شريحة بنفس اللون عشان يبان مقصود.
-**لو عندك اللوجو بخلفية شفافة (PNG/SVG) ابعته** — هيبقى أنضف بكتير.
-
-### صور المنتجات
-
-لسه مفيش. كل موديل بيتعرض برسمة SVG بلون المنتج (`src/components/garment.tsx`).
-عشان تحط صور حقيقية:
-
-1. حط الصور في `public/products/` باسم الـ slug (مثال:
-   `public/products/knit-cardigan-flower.jpg`).
-2. في `src/components/product-card.tsx` و `src/app/product/[slug]/product-view.tsx`
-   استبدل `<Garment ... />` بـ `<Image src={`/products/${p.slug}.jpg`} ... />`.
-
-الرسمة هتفضل مفيدة كـ fallback لأي موديل لسه ماتصورش.
-
----
-
-## ألوان البراند
-
-مسحوبة من اللوجو والبوستات الرسمية ومتعرّفة في [`tailwind.config.ts`](tailwind.config.ts):
-
-| اللون | الكود | الاستخدام |
-|---|---|---|
-| وردي | `#D9536E` | اللون الأساسي — الأزرار والروابط |
-| بمبي الفراشة | `#E2789F` | لون مساعد |
-| برتقالي | `#EE8B4F` | تمييز وتحديد |
-| بيج اللوجو | `#E6D9C9` | خلفية شريحة اللوجو |
-| كريمي | `#FAF3EC` | خلفية الصفحة |
-
----
-
-## إزاي الطلب بيشتغل
-
-مفيش عربة شراء ولا دفع أونلاين — ده مصنع جملة.
-
-1. التاجر بيضيف موديلات لـ «الطلبية» (المقاس + اللون + عدد الباكوهات).
-2. الطلبية بتتخزن في `localStorage` فبتفضل موجودة لو قفل الصفحة.
-3. زرار «ابعت الطلبية على واتساب» بيبني رسالة مرتّبة فيها كل بند بمقاسه ولونه
-   وعدد قطعه، وبيفتح واتساب بيها جاهزة على رقم `01060066958`.
-
-الرسالة بتتبني في `buildOrderMessage()` في `src/lib/store.tsx`. طالما
-`showPrices: false` الرسالة بتطلع من غير أسعار.
-
-فورم صفحة «تواصل معنا» بيشتغل بنفس المنطق: بيحوّل البيانات لرسالة واتساب،
-مفيش سيرفر ولا إيميل باك-إند.
-
----
-
-## الصفحات
-
-| المسار | الصفحة |
-|---|---|
-| `/` | الرئيسية — هيرو، أقسام، موديلات، مميزات، خطوات الطلب، صور المعرض، سوشيال |
-| `/catalog` | الكتالوج مع بحث وفلتر أقسام (`?cat=knitwear` بيفتح على قسم) |
-| `/product/[slug]` | صفحة الموديل — ألوان، مقاسات، حاسبة الباكوهات، مواصفات |
-| `/wholesale` | التعامل بالجملة |
-| `/about` | عن المصنع — القصة، بنصنّع إيه، صور الجناح، القيم |
-| `/contact` | فورم واتساب + بيانات التواصل + سوشيال + خريطة |
-
-## البناء الفني
-
-- **Next.js 14** (App Router) + **TypeScript** + **Tailwind**
-- خط **Cairo** من Google Fonts عن طريق `next/font`
-- اللغة والطلبية في context واحد: `src/lib/store.tsx`
-- مفيش قاعدة بيانات، مفيش API، مفيش متغيرات بيئة
